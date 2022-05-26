@@ -58,6 +58,14 @@ DWORD PID;
 HANDLE hProc;
 char PROCESS[128]{};
 char PATH[128]{};
+int exit(const char* Text)
+{
+	printf(Text);
+	Sleep(2000);
+	memset(PROCESS, 0, 128);
+	memset(PATH, 0, 128);
+	return 0;
+}
 int main()
 {
 	//	Get Process
@@ -68,42 +76,26 @@ int main()
 	printf("DLL PATH: ");
 	scanf("%s127\n", PATH);
 
+	//	Get Proc ID
 	PID = GetProcId(Char2WChar(PROCESS));
 	if (PID == NULL)
-	{ 
-		memset(PROCESS, 0, 128);
-		memset(PATH, 0, 128);
-		printf("PROCESS NOT FOUND\nEXITING . . .\n");
-		Sleep(2000);
-		return 0;
-	}
+		return exit("PROCESS NOT FOUND\nEXITING . . .\n");
 	system("cls");
 
-
+	//	Open Handle to Process
 	hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, PID);
 	if (hProc == NULL)
-	{
-		memset(PROCESS, 0, 128);
-		memset(PATH, 0, 128);
-		printf("COULDN'T OPEN HANDLE TO PROCESS\nEXITING . . .\n");
-		Sleep(2000);
-		return 0;
-	}
+		return exit("COULDN'T OPEN HANDLE TO PROCESS\nEXITING . . .\n");
+
+	//	Debug Print
 	printf("SELECTED PROCESS: %s\n", PROCESS);
 	printf("SELECTED DLL: %s\n", PATH);
 	printf("PID: %d\n", PID);
 
-	if (!Inject(hProc, PATH)) {
-		printf("INJECTION FAILED!\n");
-		Sleep(2000);
-		memset(PROCESS, 0, 128);
-		memset(PATH, 0, 128);
-		return 0;
-	}
-
-
-	printf("INJECTION SUCCESS!\n");
-	memset(PROCESS, 0, 128);
-	memset(PATH, 0, 128);
-	return 0;
+	//	Inject
+	if (!Inject(hProc, PATH))
+		return exit("INJECTION FAILED!\n");
+	
+	//	Exit
+	return exit("INJECTION SUCCESS!\n");
 }
